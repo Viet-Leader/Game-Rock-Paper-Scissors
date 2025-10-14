@@ -1,74 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock Paper Scissors</title>
-    <link rel="stylesheet" href="./style/reset.css">
-    <link rel="stylesheet" href="./style/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rock Paper Scissors - Room</title>
+  <link rel="stylesheet" href="./style/reset.css" />
+  <link rel="stylesheet" href="./style/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* 🌟 Nút bắt đầu giữa màn hình */
+    #startGameBtn {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #ffb300, #ff6f00);
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      border: none;
+      border-radius: 18px;
+      padding: 22px 45px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      z-index: 999;
+    }
+    #startGameBtn:hover {
+      background: linear-gradient(135deg, #ffd54f, #ff9100);
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="content">
-            <div class="row">
-                <h1>Rock Paper Scissors</h1>
-                <div class="btn exit">
-                    <a href="#!" style="color:#ffff">Leave Game</a>
-                </div>
-            </div>
+  <header>
+    <div class="content">
+      <div class="row">
+        <div>
+          <h1>Rock Paper Scissors</h1>
+          <div class="info-bar" id="playerInfo"></div>
         </div>
-    </header>
-    <div class="score">
-        <div class="content">
-            <div class="row">
-                <div class="col">
-                    <div class="name">You</div>
-                    <div class="point">0</div>
-                </div>
-                <div class="point">VS</div>
-                <div class="col">
-                    <div class="name">Opponent</div>
-                    <div class="point">0</div>
-                </div>
-            </div>
+        <div class="btn exit">
+          <a href="#!" style="color: #fff;">Leave Game</a>
         </div>
-    <div class="chat">
-        <div class="content">
-            <div class="chat-header">💬 Chat Room</div>
-            <div class="chat-messages">
-                <div class="message user">You: Let's play!</div>
-                <div class="message bot">Bot: Ready when you are 😄</div>
-            </div>
-            <div class="chat-input">
-                <input type="text" placeholder="Type a message..." id="chatInput">
-                <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
-        </div>
+      </div>
     </div>
-    
-    </div>
-    <div class="choice">
-        <div class="content">
-            <div class="col">
-                <h3>Choose Your Move!</h3>
-                <div class="row">
-                    <a href="#!" class="btn">
-                        <i class="fa-solid fa-hand-back-fist" style="color: #FFD43B;"></i>
-                        <span class="desc">Rock</span>
-                    </a>
-                    <a href="#!" class="btn">
-                        <i class="fa-solid fa-hand" style="color: #FFD43B;"></i>
-                        <span class="desc">Paper</span>
-                    </a>
-                    <a href="#!" class="btn">
-                        <i class="fa-solid fa-hand-scissors" style="color: #FFD43B;"></i>
-                        <span class="desc">Scissors</span>
-                    </a>
-                </div>
-            </div>
+  </header>
+
+  <div class="score">
+    <div class="content">
+      <div class="row">
+        <div class="col">
+          <div class="name">You</div>
+          <div class="point" id="yourScore">0</div>
         </div>
+        <div class="point">VS</div>
+        <div class="col">
+          <div class="name">Opponent</div>
+          <div class="point" id="opponentScore">0</div>
+        </div>
+      </div>
     </div>
-    
+  </div>
+
+  <div class="chat">
+    <div class="content">
+      <div class="chat-header">💬 Chat Room</div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input type="text" placeholder="Type a message..." id="chatInput" />
+        <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="choice">
+    <div class="content">
+      <div class="col">
+        <h3>Choose Your Move!</h3>
+        <div class="row">
+          <a href="#!" class="btn" data-choice="rock">
+            <i class="fa-solid fa-hand-back-fist" style="color: #FFD43B;"></i>
+            <span class="desc">Rock</span>
+          </a>
+          <a href="#!" class="btn" data-choice="paper">
+            <i class="fa-solid fa-hand" style="color: #FFD43B;"></i>
+            <span class="desc">Paper</span>
+          </a>
+          <a href="#!" class="btn" data-choice="scissors">
+            <i class="fa-solid fa-hand-scissors" style="color: #FFD43B;"></i>
+            <span class="desc">Scissors</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:4001");
+
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get("name") || "Guest";
+    const currentRoom = (params.get("code") || "ROOM1").toUpperCase();
+
+    const playerInfo = document.getElementById("playerInfo");
+    const yourScore = document.getElementById("yourScore");
+    const opponentScore = document.getElementById("opponentScore");
+    const chatMessages = document.getElementById("chatMessages");
+    const choiceSection = document.querySelector(".choice");
+    const buttons = document.querySelectorAll(".choice .btn");
+
+    const startButton = document.createElement("button");
+    startButton.id = "startGameBtn";
+    startButton.innerText = "🎮 Bắt đầu trận đấu";
+    document.body.appendChild(startButton);
+
+    choiceSection.style.display = "none";
+    playerInfo.innerText = `Player: ${username} | Room: ${currentRoom}`;
+
+    socket.on("connect", () => {
+      socket.emit("join_room", { username, roomCode: currentRoom });
+    });
+
+    // Chat
+    socket.on("chat_message", (m) => {
+      const msg = document.createElement("div");
+      msg.classList.add("message");
+      msg.innerText = `${m.username}: ${m.text}`;
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      const text = document.getElementById("chatInput").value.trim();
+      if (!text) return;
+      socket.emit("chat_message", { roomCode: currentRoom, username, text });
+      document.getElementById("chatInput").value = "";
+    });
+
+    // Khi nhấn "Bắt đầu trận đấu"
+    startButton.addEventListener("click", () => {
+      socket.emit("start_game", { roomCode: currentRoom });
+    });
+
+    // Khi server gửi "game_started" — áp dụng cho cả 2 bên
+    socket.on("game_started", () => {
+      // Hiện tất cả nút chọn lại (cả hai bên)
+      buttons.forEach((b) => (b.style.display = "inline-block"));
+
+      startButton.style.display = "none";
+      choiceSection.style.display = "block";
+      yourScore.innerText = "0";
+      opponentScore.innerText = "0";
+    });
+
+    // Khi chọn kéo/búa/bao
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const choice = btn.dataset.choice;
+        // Ẩn 2 nút còn lại
+        buttons.forEach((b) => {
+          if (b.dataset.choice !== choice) b.style.display = "none";
+        });
+        socket.emit("player_choice", { roomCode: currentRoom, username, choice });
+      });
+    });
+
+    // Nhận kết quả từng ván
+    socket.on("round_result", (data) => {
+      const { players, winner, scores } = data;
+      const [p1, p2] = players;
+      const opponent = p1.username === username ? p2.username : p1.username;
+
+      yourScore.innerText = scores[username] || 0;
+      opponentScore.innerText = scores[opponent] || 0;
+
+      let msg = `${p1.username} chọn ${p1.choice} vs ${p2.username} chọn ${p2.choice} → `;
+      msg += winner === "Draw" ? "Hòa!" : `${winner} thắng ván này!`;
+      alert(msg);
+    });
+
+    // Khi server báo sang ván mới
+    socket.on("next_round", ({ scores }) => {
+      buttons.forEach((b) => (b.style.display = "inline-block"));
+    });
+
+    // Khi game kết thúc
+    socket.on("game_over", ({ winner }) => {
+      alert(`🎉 Trận đấu đã kết thúc, ${winner} đã thắng trận này!`);
+      choiceSection.style.display = "none";
+      startButton.style.display = "block";
+    });
+
+    // Rời phòng
+    document.querySelector(".exit a").addEventListener("click", () => {
+      socket.emit("leave_room", { roomCode: currentRoom });
+      window.location.href = "index.html";
+    });
+  </script>
 </body>
 </html>

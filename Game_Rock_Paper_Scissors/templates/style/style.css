@@ -9,6 +9,13 @@
 html,
 body {
     scroll-behavior: smooth;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #8EC5FC;
+background: linear-gradient(90deg, rgba(142, 197, 252, 1) 0%, rgba(161, 216, 255, 1) 37%, rgba(224, 195, 255, 1) 100%);
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
 }
 
 html {
@@ -42,6 +49,7 @@ a {
     font-size: 1.4rem;
     text-align: center;
     color: #ffffff;
+    height: 53px;
 }
 
 .btn:hover {
