@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rock Paper Scissors - Lobby</title>
+  <link rel="stylesheet" href="./style/reset.css" />
+  <link rel="stylesheet" href="./style/style.css" />
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      
+    }
+    .content {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      width: 320px;
+      transition: all 0.3s ease;
+    }
+    h1 { margin-bottom: 20px; }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      text-align: center;
+      outline: none;
+    }
+    .btn {
+      display: inline-block;
+      margin: 8px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn.pink { background: #ff4fa3; color: #fff; }
+    .btn.blue { background: #007bff; color: #fff; }
+    .btn.gray { background: #555; color: #fff; }
+    .btn:hover { opacity: 0.8; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <!-- GIAO DIỆN 1: LOBBY -->
+  <div id="lobby" class="content">
+    <h1>Rock Paper Scissors</h1>
+    <input id="playerName" type="text" placeholder="Enter your name" />
+    <div>
+      <button id="createBtn" class="btn pink">Create Room</button>
+      <button id="enterBtn" class="btn blue">Enter Room</button>
+    </div>
+  </div>
+
+  <!-- GIAO DIỆN 2: NHẬP MÃ PHÒNG -->
+  <div id="enterRoom" class="content hidden">
+    <h1>Enter Room</h1>
+    <input id="roomCode" type="text" placeholder="Enter room code" />
+    <div>
+      <button id="playBtn" class="btn pink">Play</button>
+      <button id="leaveBtn" class="btn gray">Leave</button>
+    </div>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById('playerName');
+    const createBtn = document.getElementById('createBtn');
+    const enterBtn = document.getElementById('enterBtn');
+
+    const lobbyDiv = document.getElementById('lobby');
+    const enterRoomDiv = document.getElementById('enterRoom');
+    const roomCodeInput = document.getElementById('roomCode');
+    const playBtn = document.getElementById('playBtn');
+    const leaveBtn = document.getElementById('leaveBtn');
+
+    // Chuyển sang giao diện nhập mã
+    enterBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (!name) return alert('Please enter your name first!');
+      lobbyDiv.classList.add('hidden');
+      enterRoomDiv.classList.remove('hidden');
+    });
+
+    // Quay lại lobby
+    leaveBtn.addEventListener('click', () => {
+      enterRoomDiv.classList.add('hidden');
+      lobbyDiv.classList.remove('hidden');
+    });
+
+    // Tạo phòng
+    createBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (!name) return alert('Please enter your name');
+      const code = Math.random().toString(36).slice(2, 7).toUpperCase();
+      goToRoom(name, code);
+    });
+
+    // Vào phòng bằng mã
+    playBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      const code = roomCodeInput.value.trim().toUpperCase();
+      if (!code) return alert('Please enter a room code');
+      goToRoom(name, code);
+    });
+
+    // Chuyển sang room.html
+    function goToRoom(name, code) {
+      const query = new URLSearchParams({ name, code });
+      location.href = `room.html?${query.toString()}`;
+    }
+  </script>
+</body>
+</html>
