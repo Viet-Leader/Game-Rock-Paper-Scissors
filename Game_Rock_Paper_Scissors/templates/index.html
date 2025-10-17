@@ -1,122 +1,307 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rock Paper Scissors - Lobby</title>
+  <title>Kéo Búa Bao - Lobby</title>
   <link rel="stylesheet" href="./style/reset.css" />
   <link rel="stylesheet" href="./style/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      
+      min-height: 100vh;
+      background: linear-gradient(135deg, #d32f2f 0%, #f57c00 25%, #ffc107 50%, #388e3c 75%, #1976d2 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 20px;
     }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
     .content {
       text-align: center;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      width: 320px;
-      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.95);
+      -webkit-backdrop-filter: blur(15px);
+      backdrop-filter: blur(15px);
+      padding: 40px 30px;
+      border-radius: 25px;
+      box-shadow: 0 20px 40px rgba(211, 47, 47, 0.3);
+      width: 100%;
+      max-width: 400px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 3px solid #ffc107;
+      position: relative;
+      overflow: hidden;
     }
-    h1 { margin-bottom: 20px; }
+    
+    .content::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 193, 7, 0.1), transparent);
+      animation: rotate 10s linear infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .content:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 30px 60px rgba(211, 47, 47, 0.4);
+    }
+    
+    h1 { 
+      margin-bottom: 30px;
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #d32f2f, #ffc107, #388e3c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      animation: titleGlow 3s ease-in-out infinite alternate;
+      position: relative;
+      z-index: 1;
+    }
+    
+    @keyframes titleGlow {
+      0% { filter: brightness(1); }
+      100% { filter: brightness(1.2); }
+    }
+    
     input {
-      width: 80%;
-      padding: 10px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 8px;
+      width: 100%;
+      padding: 15px 20px;
+      margin: 15px 0;
+      border: 2px solid rgba(255, 193, 7, 0.5);
+      border-radius: 15px;
       text-align: center;
       outline: none;
+      background: rgba(255, 255, 255, 0.95);
+      color: #2e2e2e;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
+    
+    input::placeholder {
+      color: #666 !important;
+      opacity: 1 !important;
+    }
+    
+    input:focus {
+      border-color: #ffc107;
+      background: rgba(255, 255, 255, 1);
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
+    }
+    
     .btn {
       display: inline-block;
-      margin: 8px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
+      margin: 10px;
+      padding: 15px 25px;
+      border: 2px solid #ffc107;
+      border-radius: 20px;
+      font-weight: 700;
       cursor: pointer;
-      transition: 0.3s;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
-    .btn.pink { background: #ff4fa3; color: #fff; }
-    .btn.blue { background: #007bff; color: #fff; }
-    .btn.gray { background: #555; color: #fff; }
-    .btn:hover { opacity: 0.8; }
-    .hidden { display: none; }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.4), transparent);
+      transition: left 0.6s ease;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn.pink { 
+      background: linear-gradient(45deg, #d32f2f, #f57c00);
+      color: #fff;
+      box-shadow: 0 8px 25px rgba(211, 47, 47, 0.4);
+    }
+    
+    .btn.blue { 
+      background: linear-gradient(45deg, #388e3c, #1976d2);
+      color: #fff;
+      box-shadow: 0 8px 25px rgba(56, 142, 60, 0.4);
+    }
+    
+    .btn.gray { 
+      background: linear-gradient(45deg, #6c757d, #495057);
+      color: #fff;
+      box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+    }
+    
+    .btn:hover { 
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(211, 47, 47, 0.6);
+      border-color: #ffc107;
+    }
+    
+    .btn:active {
+      transform: translateY(-2px) scale(1.02);
+    }
+    
+    .hidden { 
+      display: none; 
+    }
+    
+    .sound-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 193, 7, 0.3);
+      border-radius: 50%;
+      padding: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: white;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .sound-btn:hover {
+      background: rgba(255, 193, 7, 0.3);
+      border-color: #ffc107;
+      transform: scale(1.1);
+    }
+    
+    .test-btn {
+      right: 80px;
+    }
+    
+    .custom-alert {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .alert-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      max-width: 300px;
+      color: #333;
+    }
+    
+    .alert-content i {
+      font-size: 2rem;
+      color: #ff6b6b;
+      margin-bottom: 15px;
+    }
+    
+    .alert-content p {
+      margin: 15px 0;
+      font-size: 1.1rem;
+    }
+    
+    .alert-btn {
+      background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .alert-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
+    
+    @media (max-width: 480px) {
+      .content {
+        padding: 30px 20px;
+        margin: 10px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .btn {
+        padding: 12px 20px;
+        margin: 8px;
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
 <body>
   <!-- GIAO DIỆN 1: LOBBY -->
   <div id="lobby" class="content">
-    <h1>Rock Paper Scissors</h1>
-    <input id="playerName" type="text" placeholder="Enter your name" />
+    <h1><i class="fa-solid fa-hand-scissors"></i> Kéo Búa Bao</h1>
+    <input id="playerName" type="text" placeholder="Nhập tên của bạn" />
     <div>
-      <button id="createBtn" class="btn pink">Create Room</button>
-      <button id="enterBtn" class="btn blue">Enter Room</button>
+      <button id="createBtn" class="btn pink">
+        <i class="fa-solid fa-plus"></i> Tạo phòng
+      </button>
+      <button id="enterBtn" class="btn blue">
+        <i class="fa-solid fa-sign-in-alt"></i> Vào phòng
+      </button>
     </div>
   </div>
 
   <!-- GIAO DIỆN 2: NHẬP MÃ PHÒNG -->
   <div id="enterRoom" class="content hidden">
-    <h1>Enter Room</h1>
-    <input id="roomCode" type="text" placeholder="Enter room code" />
+    <h1><i class="fa-solid fa-key"></i> Nhập mã phòng</h1>
+    <input id="roomCode" type="text" placeholder="Nhập mã phòng" maxlength="5" />
     <div>
-      <button id="playBtn" class="btn pink">Play</button>
-      <button id="leaveBtn" class="btn gray">Leave</button>
+      <button id="playBtn" class="btn pink">
+        <i class="fa-solid fa-play"></i> Chơi ngay
+      </button>
+      <button id="leaveBtn" class="btn gray">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+      </button>
     </div>
   </div>
 
-  <script>
-    const nameInput = document.getElementById('playerName');
-    const createBtn = document.getElementById('createBtn');
-    const enterBtn = document.getElementById('enterBtn');
+  <button id="soundToggle" title="Bật/tắt âm thanh" class="sound-btn"><i class="fa-solid fa-volume-high"></i></button>
+  <button id="testSound" title="Test âm thanh" class="sound-btn test-btn"><i class="fa-solid fa-music"></i></button>
 
-    const lobbyDiv = document.getElementById('lobby');
-    const enterRoomDiv = document.getElementById('enterRoom');
-    const roomCodeInput = document.getElementById('roomCode');
-    const playBtn = document.getElementById('playBtn');
-    const leaveBtn = document.getElementById('leaveBtn');
-
-    // Chuyển sang giao diện nhập mã
-    enterBtn.addEventListener('click', () => {
-      const name = nameInput.value.trim();
-      if (!name) return alert('Please enter your name first!');
-      lobbyDiv.classList.add('hidden');
-      enterRoomDiv.classList.remove('hidden');
-    });
-
-    // Quay lại lobby
-    leaveBtn.addEventListener('click', () => {
-      enterRoomDiv.classList.add('hidden');
-      lobbyDiv.classList.remove('hidden');
-    });
-
-    // Tạo phòng
-    createBtn.addEventListener('click', () => {
-      const name = nameInput.value.trim();
-      if (!name) return alert('Please enter your name');
-      const code = Math.random().toString(36).slice(2, 7).toUpperCase();
-      goToRoom(name, code);
-    });
-
-    // Vào phòng bằng mã
-    playBtn.addEventListener('click', () => {
-      const name = nameInput.value.trim();
-      const code = roomCodeInput.value.trim().toUpperCase();
-      if (!code) return alert('Please enter a room code');
-      goToRoom(name, code);
-    });
-
-    // Chuyển sang room.html
-    function goToRoom(name, code) {
-      const query = new URLSearchParams({ name, code });
-      location.href = `room.html?${query.toString()}`;
-    }
-  </script>
+  <script src="js/audio.js"></script>
+  <script src="js/lobby.js"></script>
 </body>
 </html>
