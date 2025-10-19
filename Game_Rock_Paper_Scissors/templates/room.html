@@ -193,7 +193,7 @@
       opponentScore.innerText = scores[opponent] || 0;
 
       let msg = `${p1.username} chọn ${p1.choice} vs ${p2.username} chọn ${p2.choice} → `;
-      msg += winner === "Draw" ? "Hòa!" : `${winner} thắng ván này!`;
+      msg += !winner ? "Hòa!" : `${winner} thắng ván này!`;
       alert(msg);
     });
 
