@@ -2,6 +2,8 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
+//const { use } = require("react");
+const { log } = require("console");
 
 const app = express();
 const server = http.createServer(app);
@@ -36,12 +38,16 @@ io.on("connection", (socket) => {
 
   // --- Bắt đầu trò chơi (có đếm ngược) ---
   socket.on("start_game", ({ roomCode }) => {
+    const room = rooms[roomCode];
+    if (!room) return;
+    room.choices = {};
     let count = 3;
     const countdownInterval = setInterval(() => {
       io.to(roomCode).emit("countdown", count);
       count--;
       if (count < 0) {
         clearInterval(countdownInterval);
+        room.gameActive = true;
         io.to(roomCode).emit("game_started");
       }
     }, 1000);
@@ -52,26 +58,32 @@ io.on("connection", (socket) => {
     const room = rooms[roomCode];
     if (!room || !room.gameActive) return;
 
+    if (!room.players.find(p => p.username === username)) return;
+
     room.choices[username] = choice;
+    const expectedChoices = 2; // Số người chơi trong phòng
+    if (Object.keys(room.choices).length === expectedChoices) {
+      const playersList = room.players
+        .filter(p => room.choices[p.username] !== undefined)
+        .map(p => ({ username: p.username, choice: room.choices[p.username] }));
+      if (playersList.length < 2) return;
 
-    if (Object.keys(room.choices).length === 2) {
-      const players = Object.entries(room.choices).map(([u, c]) => ({ username: u, choice: c }));
-      const [p1, p2] = players;
-
+      const [p1, p2] = playersList;
       const result = getWinner(p1.choice, p2.choice);
-      let winner = "Draw";
-      if (result === 1) winner = p1.username;
-      else if (result === 2) winner = p2.username;
+      let winner = null;
+      if (result === 1)
+        winner = p1.username;
+      else if (result === 2)
+        winner = p2.username;
 
-      if (winner !== "Draw") room.scores[winner]++;
+      if (winner) room.scores[winner] = (room.scores[winner] || 0) + 1;
 
       io.to(roomCode).emit("round_result", {
-        players,
+        players: playersList,
         winner,
         scores: room.scores
       });
 
-      // --- Kiểm tra thắng 3 điểm ---
       const winCount = Object.values(room.scores);
       if (winCount.some(v => v >= 3)) {
         const matchWinner = Object.keys(room.scores).find(u => room.scores[u] >= 3);
@@ -80,12 +92,10 @@ io.on("connection", (socket) => {
 
         io.to(roomCode).emit("game_over", { winner: matchWinner });
 
-        // Reset
         room.gameActive = false;
         room.choices = {};
         room.players.forEach(p => (room.scores[p.username] = 0));
       } else {
-        // Reset ván mới sau 3s
         setTimeout(() => {
           room.choices = {};
           io.to(roomCode).emit("next_round", { scores: room.scores });
@@ -99,13 +109,45 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("chat_message", { username, text });
   });
 
+  // --- Người chơi rời phòng ---
+  // 🛠️ Sửa lỗi lặp & sai chính tả: chỉ giữ lại 1 event duy nhất "leave_room"
   socket.on("leave_room", ({ roomCode }) => {
     socket.leave(roomCode);
-    console.log(`🚪 Left ${roomCode}`);
+    const room = rooms[roomCode];
+    if (!room) return;
+
+    // 🛠️ Di chuyển logic rời phòng đúng vị trí, không bị lồng trong event khác
+    const player = room.players.find(p => p.id === socket.id);
+    if (!player) return;
+
+    const username = player.username;
+    room.players = room.players.filter(p => p.id !== socket.id);
+    delete room.scores[username];
+    delete room.choices[username];
+    io.to(roomCode).emit("player_left", { username });
+
+    // 🛠️ Vị trí đúng: kiểm tra nếu phòng trống thì xóa
+    if (room.players.length === 0) delete rooms[roomCode];
+
+    console.log(`🚪 ${username || socket.id} left ${roomCode}`);
   });
 
+  // --- Người chơi ngắt kết nối ---
+  // 🛠️ Giữ 1 event "disconnect" duy nhất (xóa bản trùng ở dưới)
   socket.on("disconnect", () => {
     console.log("🔴 Disconnected:", socket.id);
+    for (const roomCode of Object.keys(rooms)) {
+      const room = rooms[roomCode];
+      const idx = room.players.findIndex(p => p.id === socket.id);
+      if (idx !== -1) {
+        const username = room.players[idx].username;
+        room.players.splice(idx, 1);
+        delete room.scores[username];
+        delete room.choices[username];
+        io.to(roomCode).emit("player_left", { username });
+        if (room.players.length === 0) delete rooms[roomCode];
+      }
+    }
   });
 });
 
