@@ -7,18 +7,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// 🟢 Serve static folders
-app.use('/assets', express.static(path.join(__dirname, 'assets'))); // chứa ảnh, âm thanh
-app.use(express.static(path.join(__dirname, "templates"))); // chứa file HTML, CSS, JS
+// 🟢 Dùng thư mục 'templates' thay vì 'public'
+app.use(express.static(path.join(__dirname, "templates")));
 
-// 🧩 Dữ liệu phòng và bảng xếp hạng
 const rooms = {}; // roomCode -> { players: [], choices: {}, scores: {}, gameActive: false }
-const leaderboard = {}; // username -> totalWins (in-memory)
 
 io.on("connection", (socket) => {
   console.log("🟢 Connected:", socket.id);
 
-  // --- Người chơi tham gia phòng ---
   socket.on("join_room", ({ username, roomCode }) => {
     socket.join(roomCode);
     if (!rooms[roomCode]) {
@@ -34,20 +30,18 @@ io.on("connection", (socket) => {
     console.log(`👥 ${username} joined ${roomCode}`);
   });
 
-  // --- Bắt đầu trò chơi (có đếm ngược) ---
   socket.on("start_game", ({ roomCode }) => {
-    let count = 3;
-    const countdownInterval = setInterval(() => {
-      io.to(roomCode).emit("countdown", count);
-      count--;
-      if (count < 0) {
-        clearInterval(countdownInterval);
-        io.to(roomCode).emit("game_started");
-      }
-    }, 1000);
+    const room = rooms[roomCode];
+    if (!room) return;
+
+    room.gameActive = true;
+    room.choices = {};
+    room.players.forEach(p => (room.scores[p.username] = 0));
+
+    io.to(roomCode).emit("game_started");
+    console.log(`🎮 Game started in room ${roomCode}`);
   });
 
-  // --- Người chơi chọn ---
   socket.on("player_choice", ({ roomCode, username, choice }) => {
     const room = rooms[roomCode];
     if (!room || !room.gameActive) return;
@@ -71,21 +65,18 @@ io.on("connection", (socket) => {
         scores: room.scores
       });
 
-      // --- Kiểm tra thắng 3 điểm ---
+      // Kiểm tra thắng 3 điểm
       const winCount = Object.values(room.scores);
       if (winCount.some(v => v >= 3)) {
         const matchWinner = Object.keys(room.scores).find(u => room.scores[u] >= 3);
-
-        leaderboard[matchWinner] = (leaderboard[matchWinner] || 0) + 1;
-
         io.to(roomCode).emit("game_over", { winner: matchWinner });
 
-        // Reset
+        // Reset sau khi kết thúc
         room.gameActive = false;
         room.choices = {};
         room.players.forEach(p => (room.scores[p.username] = 0));
       } else {
-        // Reset ván mới sau 3s
+        // Chờ 3s rồi reset lượt chọn
         setTimeout(() => {
           room.choices = {};
           io.to(roomCode).emit("next_round", { scores: room.scores });
@@ -94,7 +85,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // --- Chat ---
   socket.on("chat_message", ({ roomCode, username, text }) => {
     io.to(roomCode).emit("chat_message", { username, text });
   });
@@ -109,28 +99,15 @@ io.on("connection", (socket) => {
   });
 });
 
-// --- Hàm xác định người thắng ---
 function getWinner(a, b) {
   if (a === b) return 0;
   if (
     (a === "rock" && b === "scissors") ||
     (a === "paper" && b === "rock") ||
     (a === "scissors" && b === "paper")
-  ) return 1;
+  )
+    return 1;
   return 2;
 }
 
-// --- Leaderboard ---
-app.get('/leaderboard', (req, res) => {
-  const list = Object.entries(leaderboard)
-    .map(([username, score]) => ({ username, score }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 50);
-  res.json(list);
-});
-
-// --- Khởi chạy server ---
 server.listen(4001, () => console.log("🚀 Server running on http://localhost:4001"));
-
-// --- Export ---
-module.exports = { getWinner, rooms, leaderboard };

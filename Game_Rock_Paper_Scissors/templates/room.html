@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="./style/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
+    /* 🌟 Nút bắt đầu giữa màn hình */
     #startGameBtn {
       position: fixed;
       top: 50%;
@@ -28,13 +29,6 @@
     #startGameBtn:hover {
       background: linear-gradient(135deg, #ffd54f, #ff9100);
       transform: translate(-50%, -50%) scale(1.08);
-    }
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    .flash {
-      animation: flash 0.5s ease;
     }
   </style>
 </head>
@@ -79,8 +73,10 @@
       </div>
     </div>
   </div>
+
+  <div class="choice">
     <div class="content">
-      <div class="col choice">
+      <div class="col">
         <h3>Choose Your Move!</h3>
         <div class="row">
           <a href="#!" class="btn" data-choice="rock">
@@ -148,24 +144,11 @@
       socket.emit("start_game", { roomCode: currentRoom });
     });
 
-    // 🕒 Nhận sự kiện đếm ngược
-    socket.on("countdown", (count) => {
-      const countdownEl = document.getElementById("countdown");
-      if (countdownEl) {
-        countdownEl.textContent = count; // hiển thị số
-        countdownEl.style.display = "block";
-      }
-
-      if (count === 0) {
-        setTimeout(() => {
-          if (countdownEl) countdownEl.style.display = "none";
-        }, 1000);
-      }
-    });
-
-    // Khi server gửi "game_started"
+    // Khi server gửi "game_started" — áp dụng cho cả 2 bên
     socket.on("game_started", () => {
+      // Hiện tất cả nút chọn lại (cả hai bên)
       buttons.forEach((b) => (b.style.display = "inline-block"));
+
       startButton.style.display = "none";
       choiceSection.style.display = "block";
       yourScore.innerText = "0";
@@ -176,6 +159,7 @@
     buttons.forEach((btn) => {
       btn.addEventListener("click", () => {
         const choice = btn.dataset.choice;
+        // Ẩn 2 nút còn lại
         buttons.forEach((b) => {
           if (b.dataset.choice !== choice) b.style.display = "none";
         });
@@ -215,12 +199,5 @@
       window.location.href = "index.html";
     });
   </script>
-  <div id="countdown" style="
-  display: none;
-  font-size: 80px;
-  text-align: center;
-  color: red;
-  font-weight: bold;
-"></div>
 </body>
 </html>
