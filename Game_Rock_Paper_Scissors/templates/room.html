@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rock Paper Scissors - Room</title>
+  <title>Kéo Búa Bao - Phòng chơi</title>
   <link rel="stylesheet" href="./style/reset.css" />
   <link rel="stylesheet" href="./style/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* 🌟 Nút bắt đầu giữa màn hình */
     #startGameBtn {
@@ -14,190 +15,397 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #ffb300, #ff6f00);
+      background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
       color: white;
-      font-size: 28px;
-      font-weight: bold;
+      font-size: 1.5rem;
+      font-weight: 700;
       border: none;
-      border-radius: 18px;
-      padding: 22px 45px;
+      border-radius: 25px;
+      padding: 20px 40px;
       cursor: pointer;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
       transition: all 0.3s ease;
       z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
     }
+    
     #startGameBtn:hover {
-      background: linear-gradient(135deg, #ffd54f, #ff9100);
-      transform: translate(-50%, -50%) scale(1.08);
+      background: linear-gradient(135deg, #ff8e8e, #6dd5ed);
+      transform: translate(-50%, -50%) scale(1.05);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    
+    #startGameBtn i {
+      font-size: 1.2rem;
+    }
+    
+    #soundToggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255, 193, 7, 0.3);
+      border-radius: 50%;
+      padding: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: white;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    #soundToggle:hover {
+      background: rgba(255, 193, 7, 0.3);
+      border-color: #ffc107;
+      transform: scale(1.1);
+    }
+    
+    .test-sound-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 80px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 193, 7, 0.3);
+      border-radius: 50%;
+      padding: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: white;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+    
+    .test-sound-btn:hover {
+      background: rgba(255, 193, 7, 0.3);
+      border-color: #ffc107;
+      transform: scale(1.1);
+    }
+    
+    /* Chat toggle button */
+    .chat-toggle-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: linear-gradient(45deg, var(--primary-red), var(--primary-orange));
+      border: 2px solid var(--primary-gold);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: white;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px rgba(211, 47, 47, 0.4);
+    }
+    
+    .chat-toggle-btn:hover {
+      background: linear-gradient(45deg, var(--primary-orange), var(--primary-gold));
+      transform: scale(1.1);
+      box-shadow: 0 12px 30px rgba(211, 47, 47, 0.6);
+    }
+    
+    .chat-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ff4444;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.8rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    /* Chat popup */
+    .chat-popup {
+      position: fixed;
+      bottom: 90px;
+      left: 20px;
+      width: 350px;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      border: 3px solid var(--primary-gold);
+      box-shadow: 0 20px 40px rgba(211, 47, 47, 0.3);
+      -webkit-backdrop-filter: blur(15px);
+      backdrop-filter: blur(15px);
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .chat-popup.show {
+      display: flex;
+      animation: chatSlideUp 0.3s ease;
+    }
+    
+    @keyframes chatSlideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .chat-popup-header {
+      background: linear-gradient(45deg, var(--primary-red), var(--primary-orange));
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+    
+    .chat-popup-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+    
+    .chat-popup-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .chat-popup-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .chat-popup-input {
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      border-top: 1px solid rgba(255, 193, 7, 0.3);
+      display: flex;
+      gap: 10px;
+    }
+    
+    .chat-popup-input input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 2px solid rgba(255, 193, 7, 0.3);
+      border-radius: 10px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #2e2e2e;
+    }
+    
+    .chat-popup-input input::placeholder {
+      color: #666 !important;
+      opacity: 1 !important;
+    }
+    
+    .chat-popup-input button {
+      background: linear-gradient(45deg, var(--primary-red), var(--primary-orange));
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .chat-popup-input button:hover {
+      background: linear-gradient(45deg, var(--primary-orange), var(--primary-gold));
+      transform: scale(1.05);
+    }
+    
+    /* Modal kết quả */
+    .result-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 25px;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      max-width: 400px;
+      color: #333;
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    .modal-content h3 {
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      color: #ff6b6b;
+    }
+    
+    .modal-content p {
+      margin: 20px 0;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+    
+    .modal-btn {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+    
+    .modal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      #startGameBtn {
+        font-size: 1.2rem;
+        padding: 15px 30px;
+      }
+      
+      .modal-content {
+        margin: 20px;
+        padding: 30px 20px;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="content">
-      <div class="row">
-        <div>
-          <h1>Rock Paper Scissors</h1>
-          <div class="info-bar" id="playerInfo"></div>
+    <header>
+        <div class="content folk-pattern">
+            <div class="row">
+                <div>
+                    <h1><i class="fa-solid fa-hand-scissors"></i> Kéo Búa Bao</h1>
+                    <div class="info-bar" id="playerInfo"></div>
+                </div>
+                <div class="btn exit">
+                    <a href="#!" class="exit-link">
+                        <i class="fa-solid fa-sign-out-alt"></i> Thoát game
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="btn exit">
-          <a href="#!" style="color: #fff;">Leave Game</a>
+    </header>
+
+    <div class="score">
+        <div class="content">
+            <div class="row">
+                <div class="col">
+                    <div class="name">Bạn</div>
+                    <div class="point" id="yourScore">0</div>
+                </div>
+                <div class="point">VS</div>
+                <div class="col">
+                    <div class="name">Đối thủ</div>
+                    <div class="point" id="opponentScore">0</div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </header>
 
-  <div class="score">
-    <div class="content">
-      <div class="row">
-        <div class="col">
-          <div class="name">You</div>
-          <div class="point" id="yourScore">0</div>
+    <!-- Chat button -->
+    <button id="chatToggle" class="chat-toggle-btn" title="Mở chat">
+        <i class="fa-solid fa-comments"></i>
+        <span class="chat-badge" id="chatBadge">1</span>
+    </button>
+
+    <!-- Chat popup -->
+    <div id="chatPopup" class="chat-popup">
+        <div class="chat-popup-header">
+            <span><i class="fa-solid fa-comments"></i> Phòng chat</span>
+            <button class="chat-popup-close" id="chatClose">
+                <i class="fa-solid fa-times"></i>
+            </button>
         </div>
-        <div class="point">VS</div>
-        <div class="col">
-          <div class="name">Opponent</div>
-          <div class="point" id="opponentScore">0</div>
+        <div class="chat-popup-messages" id="chatMessages"></div>
+        <div class="chat-popup-input">
+            <input type="text" placeholder="Nhập tin nhắn..." id="chatInput" />
+                <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
-      </div>
     </div>
-  </div>
 
-  <div class="chat">
-    <div class="content">
-      <div class="chat-header">💬 Chat Room</div>
-      <div class="chat-messages" id="chatMessages"></div>
-      <div class="chat-input">
-        <input type="text" placeholder="Type a message..." id="chatInput" />
-        <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
-      </div>
-    </div>
-  </div>
-
-  <div class="choice">
-    <div class="content">
-      <div class="col">
-        <h3>Choose Your Move!</h3>
-        <div class="row">
-          <a href="#!" class="btn" data-choice="rock">
-            <i class="fa-solid fa-hand-back-fist" style="color: #FFD43B;"></i>
-            <span class="desc">Rock</span>
-          </a>
-          <a href="#!" class="btn" data-choice="paper">
-            <i class="fa-solid fa-hand" style="color: #FFD43B;"></i>
-            <span class="desc">Paper</span>
-          </a>
-          <a href="#!" class="btn" data-choice="scissors">
-            <i class="fa-solid fa-hand-scissors" style="color: #FFD43B;"></i>
-            <span class="desc">Scissors</span>
-          </a>
+    <div class="choice">
+        <div class="content">
+            <div class="col">
+                <h3><i class="fa-solid fa-hand-rock"></i> Chọn nước đi của bạn!</h3>
+                <div class="row">
+                    <a href="#!" class="btn" data-choice="rock">
+                        <i class="fa-solid fa-hand-back-fist"></i>
+                        <span class="desc">Búa</span>
+                    </a>
+                    <a href="#!" class="btn" data-choice="paper">
+                        <i class="fa-solid fa-hand"></i>
+                        <span class="desc">Bao</span>
+                    </a>
+                    <a href="#!" class="btn" data-choice="scissors">
+                        <i class="fa-solid fa-hand-scissors"></i>
+                        <span class="desc">Kéo</span>
+                    </a>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-  <script>
-    const socket = io("http://localhost:4001");
+    <button id="soundToggle" title="Bật/tắt âm thanh"><i class="fa-solid fa-volume-high"></i></button>
+    <button id="testSound" title="Test âm thanh" class="test-sound-btn"><i class="fa-solid fa-music"></i></button>
 
-    const params = new URLSearchParams(window.location.search);
-    const username = params.get("name") || "Guest";
-    const currentRoom = (params.get("code") || "ROOM1").toUpperCase();
-
-    const playerInfo = document.getElementById("playerInfo");
-    const yourScore = document.getElementById("yourScore");
-    const opponentScore = document.getElementById("opponentScore");
-    const chatMessages = document.getElementById("chatMessages");
-    const choiceSection = document.querySelector(".choice");
-    const buttons = document.querySelectorAll(".choice .btn");
-
-    const startButton = document.createElement("button");
-    startButton.id = "startGameBtn";
-    startButton.innerText = "🎮 Bắt đầu trận đấu";
-    document.body.appendChild(startButton);
-
-    choiceSection.style.display = "none";
-    playerInfo.innerText = `Player: ${username} | Room: ${currentRoom}`;
-
-    socket.on("connect", () => {
-      socket.emit("join_room", { username, roomCode: currentRoom });
-    });
-
-    // Chat
-    socket.on("chat_message", (m) => {
-      const msg = document.createElement("div");
-      msg.classList.add("message");
-      msg.innerText = `${m.username}: ${m.text}`;
-      chatMessages.appendChild(msg);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    });
-
-    document.getElementById("sendBtn").addEventListener("click", () => {
-      const text = document.getElementById("chatInput").value.trim();
-      if (!text) return;
-      socket.emit("chat_message", { roomCode: currentRoom, username, text });
-      document.getElementById("chatInput").value = "";
-    });
-
-    // Khi nhấn "Bắt đầu trận đấu"
-    startButton.addEventListener("click", () => {
-      socket.emit("start_game", { roomCode: currentRoom });
-    });
-
-    // Khi server gửi "game_started" — áp dụng cho cả 2 bên
-    socket.on("game_started", () => {
-      // Hiện tất cả nút chọn lại (cả hai bên)
-      buttons.forEach((b) => (b.style.display = "inline-block"));
-
-      startButton.style.display = "none";
-      choiceSection.style.display = "block";
-      yourScore.innerText = "0";
-      opponentScore.innerText = "0";
-    });
-
-    // Khi chọn kéo/búa/bao
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const choice = btn.dataset.choice;
-        // Ẩn 2 nút còn lại
-        buttons.forEach((b) => {
-          if (b.dataset.choice !== choice) b.style.display = "none";
-        });
-        socket.emit("player_choice", { roomCode: currentRoom, username, choice });
-      });
-    });
-
-    // Nhận kết quả từng ván
-    socket.on("round_result", (data) => {
-      const { players, winner, scores } = data;
-      const [p1, p2] = players;
-      const opponent = p1.username === username ? p2.username : p1.username;
-
-      yourScore.innerText = scores[username] || 0;
-      opponentScore.innerText = scores[opponent] || 0;
-
-      let msg = `${p1.username} chọn ${p1.choice} vs ${p2.username} chọn ${p2.choice} → `;
-      msg += winner === "Draw" ? "Hòa!" : `${winner} thắng ván này!`;
-      alert(msg);
-    });
-
-    // Khi server báo sang ván mới
-    socket.on("next_round", ({ scores }) => {
-      buttons.forEach((b) => (b.style.display = "inline-block"));
-    });
-
-    // Khi game kết thúc
-    socket.on("game_over", ({ winner }) => {
-      alert(`🎉 Trận đấu đã kết thúc, ${winner} đã thắng trận này!`);
-      choiceSection.style.display = "none";
-      startButton.style.display = "block";
-    });
-
-    // Rời phòng
-    document.querySelector(".exit a").addEventListener("click", () => {
-      socket.emit("leave_room", { roomCode: currentRoom });
-      window.location.href = "index.html";
-    });
-  </script>
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/game.js"></script>
 </body>
 </html>
+
