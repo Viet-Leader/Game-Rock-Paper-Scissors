@@ -7,10 +7,17 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// 🟢 Dùng thư mục 'templates' thay vì 'public'
+// ✅ Serve tất cả file trong thư mục templates
 app.use(express.static(path.join(__dirname, "templates")));
 
-const rooms = {}; // roomCode -> { players: [], choices: {}, scores: {}, gameActive: false }
+// ✅ Serve riêng thư mục âm thanh
+app.use("/sounds", express.static(path.join(__dirname, "templates", "sounds")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "templates", "index.html"));
+});
+
+const rooms = {}; // Lưu thông tin phòng
 
 io.on("connection", (socket) => {
   console.log("🟢 Connected:", socket.id);
@@ -65,18 +72,15 @@ io.on("connection", (socket) => {
         scores: room.scores
       });
 
-      // Kiểm tra thắng 3 điểm
       const winCount = Object.values(room.scores);
       if (winCount.some(v => v >= 3)) {
         const matchWinner = Object.keys(room.scores).find(u => room.scores[u] >= 3);
         io.to(roomCode).emit("game_over", { winner: matchWinner });
 
-        // Reset sau khi kết thúc
         room.gameActive = false;
         room.choices = {};
         room.players.forEach(p => (room.scores[p.username] = 0));
       } else {
-        // Chờ 3s rồi reset lượt chọn
         setTimeout(() => {
           room.choices = {};
           io.to(roomCode).emit("next_round", { scores: room.scores });
@@ -87,11 +91,6 @@ io.on("connection", (socket) => {
 
   socket.on("chat_message", ({ roomCode, username, text }) => {
     io.to(roomCode).emit("chat_message", { username, text });
-  });
-
-  socket.on("leave_room", ({ roomCode }) => {
-    socket.leave(roomCode);
-    console.log(`🚪 Left ${roomCode}`);
   });
 
   socket.on("disconnect", () => {
